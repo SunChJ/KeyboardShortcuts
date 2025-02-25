@@ -262,7 +262,7 @@ extension KeyboardShortcuts {
 					return nil
 				}
 
-				// The “shift” key is not allowed without other modifiers or a function key, since it doesn't actually work.
+				// The "shift" key is not allowed without other modifiers or a function key, since it doesn't actually work.
 				guard
 					!event.modifiers.subtracting([.shift, .function]).isEmpty
 						|| event.specialKey?.isFunctionKey == true,
@@ -272,62 +272,13 @@ extension KeyboardShortcuts {
 					return nil
 				}
 
-				if let menuItem = shortcut.takenByMainMenu {
-					// TODO: Find a better way to make it possible to dismiss the alert by pressing "Enter". How can we make the input automatically temporarily lose focus while the alert is open?
-					blur()
-
-					NSAlert.showModal(
-						for: window,
-						title: String.localizedStringWithFormat("keyboard_shortcut_used_by_menu_item".localized, menuItem.title)
-					)
-
-					focus()
-
-					return nil
-				}
-
-				// See: https://developer.apple.com/forums/thread/763878?answerId=804374022#804374022
-				if shortcut.isDisallowed {
-					blur()
-
-					NSAlert.showModal(
-						for: window,
-						title: "keyboard_shortcut_disallowed".localized
-					)
-
-					focus()
-					return nil
-				}
-
-				if shortcut.isTakenBySystem {
-					blur()
-
-					let modalResponse = NSAlert.showModal(
-						for: window,
-						title: "keyboard_shortcut_used_by_system".localized,
-						// TODO: Add button to offer to open the relevant system settings pane for the user.
-						message: "keyboard_shortcuts_can_be_changed".localized,
-						buttonTitles: [
-							"ok".localized,
-							"force_use_shortcut".localized
-						]
-					)
-
-					focus()
-
-					// If the user has selected "Use Anyway" in the dialog (the second option), we'll continue setting the keyboard shorcut even though it's reserved by the system.
-					guard modalResponse == .alertSecondButtonReturn else {
-						return nil
-					}
-				}
-
 				stringValue = "\(shortcut)"
 				showsCancelButton = true
 
 				saveShortcut(shortcut)
 				blur()
 
-				return nil
+				return shortcut
 			}.start()
 
 			return shouldBecomeFirstResponder
