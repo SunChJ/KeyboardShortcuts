@@ -101,27 +101,17 @@ extension KeyboardShortcuts {
 			setContentHuggingPriority(.defaultHigh, for: .vertical)
 			setContentHuggingPriority(.defaultHigh, for: .horizontal)
 			
-			  // 确保所有与背景和边框相关的属性都被禁用或设置为透明
+			// 设置基本样式
 			if let cell = self.cell as? NSSearchFieldCell {
-				cell.bezelStyle = .squareBezel // 或者 .texturedRoundedBezel，根据需要调整
-				cell.isBordered = false        // 禁用边框
-				cell.drawsBackground = false   // 禁用背景绘制
-				cell.textColor = .clear        // 文本颜色设置为透明
-				cell.backgroundColor = .clear  // 背景颜色设置为透明
+				cell.bezelStyle = .roundedBezel
+				cell.isBordered = true
+				cell.drawsBackground = true
+				cell.textColor = .labelColor
+				cell.backgroundColor = .textBackgroundColor
 			}
 			
 			// 初始状态下不显示任何文本
 			self.stringValue = ""
-
-			// 确保图层背景透明
-			self.layer?.backgroundColor = NSColor.clear.cgColor
-			self.layer?.borderWidth = 0
-			self.layer?.shadowOpacity = 0
-			
-			if #available(macOS 13.0, *) {
-				// 针对 macOS 13 及以上版本的额外调整
-				self.focusRingType = .none
-			}
 
 			setUpEvents()
 		}
@@ -237,8 +227,7 @@ extension KeyboardShortcuts {
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.isBordered = false
 				cell.drawsBackground = false
-				cell.textColor = .clear
-				cell.backgroundColor = .clear
+				cell.textColor = .placeholderTextColor
 			}
 			
 			// 隐藏光标
@@ -249,13 +238,6 @@ extension KeyboardShortcuts {
 			eventMonitor = LocalEventMonitor(events: [.keyDown, .leftMouseUp, .rightMouseUp]) { [weak self] event in
 				guard let self else {
 					return nil
-				}
-
-
-				 // 确保事件处理时背景保持透明
-				self.layer?.backgroundColor = NSColor.clear.cgColor
-				if let cell = self.cell as? NSSearchFieldCell {
-					cell.backgroundColor = .clear
 				}
 
 				// 当收到键盘事件时，清除"请输入按键"提示
@@ -408,12 +390,13 @@ extension KeyboardShortcuts {
 		override public func viewDidMoveToSuperview() {
 			super.viewDidMoveToSuperview()
 			
-		 
+			// 确保视图层次结构中的所有相关属性都设置为透明
 			self.wantsLayer = true
 			self.layer?.backgroundColor = NSColor.clear.cgColor
 			self.layer?.borderWidth = 0
 			self.layer?.shadowOpacity = 0
 			
+			// 禁用所有可能导致背景变色的属性
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.isBordered = false
 				cell.drawsBackground = false
@@ -433,19 +416,12 @@ extension KeyboardShortcuts {
 		override public func textDidBeginEditing(_ notification: Notification) {
 			super.textDidBeginEditing(notification)
 			
-			    // 确保编辑开始时背景和文本完全透明
+			// 当文本编辑开始时，确保文本和背景保持透明
 			if let textView = currentEditor() as? NSTextView {
 				textView.backgroundColor = .clear
+				textView.insertionPointColor = .clear
 				textView.textColor = .clear
-				textView.insertionPointColor = .clear // 确保光标颜色也透明
 			}
-			
-			if let cell = self.cell as? NSSearchFieldCell {
-				cell.backgroundColor = .clear
-				cell.textColor = .clear
-			}
-			
-			self.layer?.backgroundColor = NSColor.clear.cgColor
 		}
 
 		/// :nodoc:
