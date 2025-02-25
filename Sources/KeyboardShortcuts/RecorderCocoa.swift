@@ -278,7 +278,7 @@ extension KeyboardShortcuts {
 				saveShortcut(shortcut)
 				blur()
 
-				return shortcut
+				return nil
 			}.start()
 
 			return shouldBecomeFirstResponder
