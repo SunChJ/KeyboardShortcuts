@@ -104,14 +104,19 @@ extension KeyboardShortcuts {
 			// 隐藏选中时的视觉效果
 			self.focusRingType = .none
 			
-			// 自定义外观，移除选中效果
+			// 自定义外观，移除选中效果和所有可能的颜色
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.bezelStyle = .roundedBezel
 				cell.isBordered = false  // 设置为 false 以移除边框
 				cell.drawsBackground = false  // 不绘制背景
 				cell.textColor = .clear  // 文本颜色设为透明
+				cell.backgroundColor = .clear  // 背景颜色设为透明
 			}
-
+			
+			// 设置背景为透明
+			self.backgroundColor = .clear
+			self.layer?.backgroundColor = CGColor.clear
+			
 			// 不设置任何文本内容
 			self.stringValue = ""
 
@@ -237,13 +242,18 @@ extension KeyboardShortcuts {
 			// 隐藏选中时的视觉效果
 			self.layer?.borderWidth = 0
 			self.layer?.shadowOpacity = 0
+			self.layer?.backgroundColor = CGColor.clear
 			
 			// 保存当前背景色和边框样式
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.isBordered = false
 				cell.drawsBackground = false
 				cell.textColor = .clear
+				cell.backgroundColor = .clear
 			}
+			
+			// 确保背景为透明
+			self.backgroundColor = .clear
 
 			// 不显示占位符
 			placeholderString = ""
@@ -377,6 +387,13 @@ extension KeyboardShortcuts {
 		private func saveShortcut(_ shortcut: Shortcut?) {
 			setShortcut(shortcut, for: shortcutName)
 			onChange?(shortcut)
+		}
+
+		/// :nodoc:
+		override public func draw(_ dirtyRect: NSRect) {
+			// 不绘制任何内容，保持完全透明
+			// 注意：这会覆盖默认的绘制行为，可能会导致一些视觉元素消失
+			// 如果需要保留某些元素，可能需要调用 super.draw(dirtyRect)
 		}
 
 		/// :nodoc:
