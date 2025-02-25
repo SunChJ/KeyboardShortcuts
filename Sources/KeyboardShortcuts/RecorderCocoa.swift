@@ -90,7 +90,7 @@ extension KeyboardShortcuts {
 
 			super.init(frame: .zero)
 			self.delegate = self
-			// 不显示任何占位符文本
+			// 设置占位符文本
 			self.placeholderString = ""
 			self.alignment = .center
 			(cell as? NSSearchFieldCell)?.searchButtonCell = nil
@@ -101,23 +101,16 @@ extension KeyboardShortcuts {
 			setContentHuggingPriority(.defaultHigh, for: .vertical)
 			setContentHuggingPriority(.defaultHigh, for: .horizontal)
 			
-			// 隐藏选中时的视觉效果
-			self.focusRingType = .none
-			
-			// 自定义外观，移除选中效果和所有可能的颜色
+			// 设置基本样式
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.bezelStyle = .roundedBezel
-				cell.isBordered = false  // 设置为 false 以移除边框
-				cell.drawsBackground = false  // 不绘制背景
-				cell.textColor = .clear  // 文本颜色设为透明
-				cell.backgroundColor = .clear  // 背景颜色设为透明
+				cell.isBordered = true
+				cell.drawsBackground = true
+				cell.textColor = .labelColor
+				cell.backgroundColor = .textBackgroundColor
 			}
 			
-			// 设置背景为透明
-			self.backgroundColor = .clear
-			self.layer?.backgroundColor = CGColor.clear
-			
-			// 不设置任何文本内容
+			// 初始状态下不显示任何文本
 			self.stringValue = ""
 
 			setUpEvents()
@@ -158,8 +151,8 @@ extension KeyboardShortcuts {
 
 		private func endRecording() {
 			eventMonitor = nil
-			// 不显示任何占位符文本
-			placeholderString = ""
+			// 清除文本
+			stringValue = ""
 			showsCancelButton = false
 			restoreCaret()
 			KeyboardShortcuts.isPaused = false
@@ -181,22 +174,13 @@ extension KeyboardShortcuts {
 				saveShortcut(nil)
 			}
 
-			// 保持文本不可见
-			stringValue = ""
-			showsCancelButton = false
+			// 不需要清除文本，让它显示出来
 		}
 
 		/// :nodoc:
 		public func controlTextDidEndEditing(_ object: Notification) {
-			// 确保文本保持为空
+			// 结束编辑时清除文本
 			stringValue = ""
-			placeholderString = ""
-			
-			// 确保文本颜色为透明
-			if let cell = self.cell as? NSSearchFieldCell {
-				cell.textColor = .clear
-			}
-			
 			endRecording()
 		}
 
@@ -239,25 +223,14 @@ extension KeyboardShortcuts {
 				return shouldBecomeFirstResponder
 			}
 			
-			// 隐藏选中时的视觉效果
-			self.layer?.borderWidth = 0
-			self.layer?.shadowOpacity = 0
-			self.layer?.backgroundColor = CGColor.clear
-			
-			// 保存当前背景色和边框样式
+			// 显示正常的文本输入样式
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.isBordered = false
 				cell.drawsBackground = false
-				cell.textColor = .clear
-				cell.backgroundColor = .clear
+				cell.textColor = .placeholderTextColor
 			}
 			
-			// 确保背景为透明
-			self.backgroundColor = .clear
-
-			// 不显示占位符
-			placeholderString = ""
-			showsCancelButton = false
+			// 隐藏光标
 			hideCaret()
 			KeyboardShortcuts.isPaused = true // The position here matters.
 			NotificationCenter.default.post(name: .recorderActiveStatusDidChange, object: nil, userInfo: ["isActive": true])
@@ -265,6 +238,11 @@ extension KeyboardShortcuts {
 			eventMonitor = LocalEventMonitor(events: [.keyDown, .leftMouseUp, .rightMouseUp]) { [weak self] event in
 				guard let self else {
 					return nil
+				}
+
+				// 当收到键盘事件时，清除"请输入按键"提示
+				if event.isKeyEvent {
+					self.stringValue = ""
 				}
 
 				let clickPoint = convert(event.locationInWindow, from: nil)
