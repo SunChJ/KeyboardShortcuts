@@ -21,7 +21,7 @@ class CollectShortcutViewModel: ObservableObject {
 	
 	var hotkey: String {
 		if isRecording {
-			return "输入快捷键"
+			return "请输入按键"  // 当处于录制状态时显示提示文字
 		}
 		
 		if let shortcut = KeyboardShortcuts.getShortcut(for: .collect) {
@@ -30,11 +30,11 @@ class CollectShortcutViewModel: ObservableObject {
 			KeyboardShortcuts.setShortcut(.init(.c, modifiers: [.shift, .command]), for: .collect)
 			return "⇧⌘C"
 		}
-		
 	}
 	
 	func clearShortcut() {
-		KeyboardShortcuts.setShortcut(nil, for: .collect)
+		KeyboardShortcuts.setShortcut(.init(.c, modifiers: [.shift, .command]), for: .collect)
+		isRecording = false  // 确保清除后退出录制状态
 	}
 }
 
@@ -60,6 +60,7 @@ struct CollectShortcut: View {
 			.contentShape(Rectangle())
 			.onTapGesture {
 			  // 点击文本时尝试激活 Recorder
+			  vm.isRecording = true  // 更新 ViewModel 的状态
 			  NotificationCenter.default.post(name: .recorderActiveStatusDidChange, object: nil, userInfo: ["isActive": true])
 			}
 			
@@ -70,6 +71,7 @@ struct CollectShortcut: View {
 			  if let isActive = notification.userInfo?["isActive"] as? Bool {
 				// 直接使用 Recorder 的活动状态更新我们的 isActive 状态
 				self.isActive = isActive
+				vm.isRecording = isActive  // 同步更新 ViewModel 的状态
 			  }
 			}
 		}
@@ -78,7 +80,7 @@ struct CollectShortcut: View {
 		Spacer()
 
 		Button {
-		  vm.clearShortcut()
+		  vm.clearShortcut()  // 调用 ViewModel 的方法来重置快捷键
 		} label: {
 		  Circle().frame(width: 20, height: 20)
 		}

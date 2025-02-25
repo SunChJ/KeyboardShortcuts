@@ -90,7 +90,8 @@ extension KeyboardShortcuts {
 
 			super.init(frame: .zero)
 			self.delegate = self
-			self.placeholderString = "record_shortcut".localized
+			// 不显示任何占位符文本
+			self.placeholderString = ""
 			self.alignment = .center
 			(cell as? NSSearchFieldCell)?.searchButtonCell = nil
 			// 完全禁用取消按钮
@@ -107,10 +108,12 @@ extension KeyboardShortcuts {
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.bezelStyle = .roundedBezel
 				cell.isBordered = false  // 设置为 false 以移除边框
-				cell.drawsBackground = true
+				cell.drawsBackground = false  // 不绘制背景
+				cell.textColor = .clear  // 文本颜色设为透明
 			}
 
-			setStringValue(name: name)
+			// 不设置任何文本内容
+			self.stringValue = ""
 
 			setUpEvents()
 		}
@@ -120,11 +123,18 @@ extension KeyboardShortcuts {
 			fatalError("init(coder:) has not been implemented")
 		}
 
-		private func setStringValue(name: KeyboardShortcuts.Name) {
-			stringValue = getShortcut(for: shortcutName).map { "\($0)" } ?? ""
-
-			// If `stringValue` is empty, hide the cancel button to let the placeholder center.
-			showsCancelButton = !stringValue.isEmpty
+		private func setStringValue(name: Name) {
+			// 保持文本为空，不显示任何内容
+			stringValue = ""
+			showsCancelButton = false
+			
+			// 确保不显示任何占位符
+			placeholderString = ""
+			
+			// 确保文本颜色为透明
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.textColor = .clear
+			}
 		}
 
 		private func setUpEvents() {
@@ -143,8 +153,9 @@ extension KeyboardShortcuts {
 
 		private func endRecording() {
 			eventMonitor = nil
-			placeholderString = "record_shortcut".localized
-			showsCancelButton = !stringValue.isEmpty
+			// 不显示任何占位符文本
+			placeholderString = ""
+			showsCancelButton = false
 			restoreCaret()
 			KeyboardShortcuts.isPaused = false
 			NotificationCenter.default.post(name: .recorderActiveStatusDidChange, object: nil, userInfo: ["isActive": false])
@@ -160,21 +171,27 @@ extension KeyboardShortcuts {
 		}
 
 		/// :nodoc:
-		public func controlTextDidChange(_ object: Notification) {
+		public func controlTextDidChange(_ notification: Notification) {
 			if stringValue.isEmpty {
 				saveShortcut(nil)
 			}
 
-			showsCancelButton = !stringValue.isEmpty
-
-			if stringValue.isEmpty {
-				// Hack to ensure that the placeholder centers after the above `showsCancelButton` setter.
-				focus()
-			}
+			// 保持文本不可见
+			stringValue = ""
+			showsCancelButton = false
 		}
 
 		/// :nodoc:
 		public func controlTextDidEndEditing(_ object: Notification) {
+			// 确保文本保持为空
+			stringValue = ""
+			placeholderString = ""
+			
+			// 确保文本颜色为透明
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.textColor = .clear
+			}
+			
 			endRecording()
 		}
 
@@ -206,11 +223,6 @@ extension KeyboardShortcuts {
 				self?.preventBecomingKey()
 			}
 
-			// 确保视图始终不显示边框
-			if let cell = self.cell as? NSSearchFieldCell {
-				cell.isBordered = false
-			}
-			
 			preventBecomingKey()
 		}
 
@@ -229,11 +241,13 @@ extension KeyboardShortcuts {
 			// 保存当前背景色和边框样式
 			if let cell = self.cell as? NSSearchFieldCell {
 				cell.isBordered = false
-				cell.drawsBackground = true
+				cell.drawsBackground = false
+				cell.textColor = .clear
 			}
 
-			placeholderString = "press_shortcut".localized
-			showsCancelButton = !stringValue.isEmpty
+			// 不显示占位符
+			placeholderString = ""
+			showsCancelButton = false
 			hideCaret()
 			KeyboardShortcuts.isPaused = true // The position here matters.
 			NotificationCenter.default.post(name: .recorderActiveStatusDidChange, object: nil, userInfo: ["isActive": true])
