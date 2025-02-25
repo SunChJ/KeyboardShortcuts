@@ -470,7 +470,7 @@ extension KeyboardShortcuts {
 					
 					// 如果是 NSVisualEffectView，禁用其效果
 					if let effectView = parentView as? NSVisualEffectView {
-						effectView.material = .clear
+						effectView.material = .underWindowBackground
 						effectView.blendingMode = .behindWindow
 						effectView.state = .inactive
 					}
