@@ -391,9 +391,10 @@ extension KeyboardShortcuts {
 
 		/// :nodoc:
 		override public func draw(_ dirtyRect: NSRect) {
-			// 不绘制任何内容，保持完全透明
-			// 注意：这会覆盖默认的绘制行为，可能会导致一些视觉元素消失
-			// 如果需要保留某些元素，可能需要调用 super.draw(dirtyRect)
+			// 完全覆盖默认绘制行为
+			// 绘制一个完全透明的背景
+			NSColor.clear.set()
+			dirtyRect.fill()
 		}
 
 		/// :nodoc:
@@ -405,6 +406,55 @@ extension KeyboardShortcuts {
 		override public var focusRingMaskBounds: NSRect {
 			// 返回零大小的矩形，确保不会绘制焦点环
 			return .zero
+		}
+
+		/// :nodoc:
+		override public func viewDidMoveToSuperview() {
+			super.viewDidMoveToSuperview()
+			
+			// 确保视图层次结构中的所有相关属性都设置为透明
+			self.wantsLayer = true
+			self.layer?.backgroundColor = NSColor.clear.cgColor
+			self.layer?.borderWidth = 0
+			self.layer?.shadowOpacity = 0
+			
+			// 禁用所有可能导致背景变色的属性
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.isBordered = false
+				cell.drawsBackground = false
+				cell.textColor = .clear
+				cell.backgroundColor = .clear
+			}
+		}
+
+		/// :nodoc:
+		override public func updateLayer() {
+			super.updateLayer()
+			// 确保层的背景为透明
+			self.layer?.backgroundColor = NSColor.clear.cgColor
+		}
+
+		/// :nodoc:
+		override public func textDidBeginEditing(_ notification: Notification) {
+			super.textDidBeginEditing(notification)
+			
+			// 当文本编辑开始时，确保文本和背景保持透明
+			if let textView = currentEditor() as? NSTextView {
+				textView.backgroundColor = .clear
+				textView.insertionPointColor = .clear
+				textView.textColor = .clear
+			}
+		}
+
+		/// :nodoc:
+		override public func textDidChange(_ notification: Notification) {
+			super.textDidChange(notification)
+			
+			// 当文本变化时，确保文本保持透明
+			if let textView = currentEditor() as? NSTextView {
+				textView.backgroundColor = .clear
+				textView.textColor = .clear
+			}
 		}
 	}
 }
