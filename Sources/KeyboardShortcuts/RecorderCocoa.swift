@@ -65,6 +65,7 @@ extension KeyboardShortcuts {
 		override public var intrinsicContentSize: CGSize {
 			var size = super.intrinsicContentSize
 			size.width = minimumWidth
+			size.height = 26 // 设置一个合适的默认高度
 			return size
 		}
 
@@ -98,8 +99,13 @@ extension KeyboardShortcuts {
 			(cell as? NSSearchFieldCell)?.cancelButtonCell = nil
 
 			self.wantsLayer = true
-			setContentHuggingPriority(.defaultHigh, for: .vertical)
+			
+			// 修改内容压缩优先级，允许视图拉伸
+			setContentHuggingPriority(.defaultLow, for: .vertical)
 			setContentHuggingPriority(.defaultHigh, for: .horizontal)
+			
+			// 设置内容压缩阻力，防止视图被压缩
+			setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
 			
 			// 设置基本样式
 			if let cell = self.cell as? NSSearchFieldCell {
@@ -108,6 +114,10 @@ extension KeyboardShortcuts {
 				cell.drawsBackground = true
 				cell.textColor = .labelColor
 				cell.backgroundColor = .textBackgroundColor
+				
+				// 允许单元格调整大小以适应内容
+				cell.wraps = true
+				cell.isScrollable = false
 			}
 			
 			// 初始状态下不显示任何文本
@@ -402,6 +412,15 @@ extension KeyboardShortcuts {
 				cell.drawsBackground = false
 				cell.textColor = .clear
 				cell.backgroundColor = .clear
+			}
+			
+			// 如果有父视图，设置高度约束以撑满父视图
+			if let superview = self.superview {
+				self.translatesAutoresizingMaskIntoConstraints = false
+				NSLayoutConstraint.activate([
+					self.heightAnchor.constraint(equalTo: superview.heightAnchor),
+					self.centerYAnchor.constraint(equalTo: superview.centerYAnchor)
+				])
 			}
 		}
 
