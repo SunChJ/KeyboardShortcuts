@@ -238,10 +238,19 @@ extension KeyboardShortcuts {
 				cell.isBordered = false
 				cell.drawsBackground = false
 				cell.textColor = .placeholderTextColor
+				cell.backgroundColor = .clear
 			}
 			
 			// 隐藏光标
 			hideCaret()
+			
+			// 确保视图及其所有子视图都是透明的
+			self.layer?.backgroundColor = NSColor.clear.cgColor
+			for subview in self.subviews {
+				subview.wantsLayer = true
+				subview.layer?.backgroundColor = NSColor.clear.cgColor
+			}
+			
 			KeyboardShortcuts.isPaused = true // The position here matters.
 			NotificationCenter.default.post(name: .recorderActiveStatusDidChange, object: nil, userInfo: ["isActive": true])
 
@@ -383,6 +392,8 @@ extension KeyboardShortcuts {
 			// 绘制一个完全透明的背景
 			NSColor.clear.set()
 			dirtyRect.fill()
+			
+			// 不调用 super.draw(_:) 以避免绘制默认的搜索框背景
 		}
 
 		/// :nodoc:
@@ -440,6 +451,39 @@ extension KeyboardShortcuts {
 				textView.backgroundColor = .clear
 				textView.insertionPointColor = .clear
 				textView.textColor = .clear
+				
+				// 禁用文本视图的绘制背景功能
+				textView.drawsBackground = false
+				
+				// 如果文本视图有层，确保它也是透明的
+				if textView.wantsLayer {
+					textView.layer?.backgroundColor = NSColor.clear.cgColor
+				}
+				
+				// 尝试找到并修改文本视图的父视图（可能是包含黑底框的视图）
+				var parentView = textView.superview
+				while parentView != nil && parentView != self {
+					parentView?.wantsLayer = true
+					parentView?.layer?.backgroundColor = NSColor.clear.cgColor
+					parentView?.layer?.borderWidth = 0
+					parentView?.layer?.shadowOpacity = 0
+					
+					// 如果是 NSVisualEffectView，禁用其效果
+					if let effectView = parentView as? NSVisualEffectView {
+						effectView.material = .clear
+						effectView.blendingMode = .behindWindow
+						effectView.state = .inactive
+					}
+					
+					parentView = parentView?.superview
+				}
+			}
+			
+			// 确保单元格不绘制背景和边框
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.isBordered = false
+				cell.drawsBackground = false
+				cell.backgroundColor = .clear
 			}
 		}
 
