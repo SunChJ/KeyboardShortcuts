@@ -61,7 +61,7 @@ struct CollectShortcut: View {
 			.onTapGesture {
 			  // 点击文本时尝试激活 Recorder
 			  vm.isRecording = true  // 更新 ViewModel 的状态
-			  NotificationCenter.default.post(name: .recorderActiveStatusDidChange, object: nil, userInfo: ["isActive": true])
+//			  KeyboardShortcuts.setRecorderActive(true)
 			}
 			
 		  // Recorder 始终存在
@@ -80,7 +80,7 @@ struct CollectShortcut: View {
 		Spacer()
 
 		Button {
-		  vm.clearShortcut()  // 调用 ViewModel 的方法来重置快捷键
+		  vm.clearShortcut()
 		} label: {
 		  Circle().frame(width: 20, height: 20)
 		}

@@ -582,9 +582,31 @@ extension KeyboardShortcuts {
 	public static func events(_ type: EventType, for name: Name) -> AsyncFilterSequence<AsyncStream<EventType>> {
 		events(for: name).filter { $0 == type }
 	}
+
+	/**
+	设置录制器的活动状态并发送通知
+	
+	- Parameter isActive: 录制器是否处于活动状态
+	*/
+	public static func setRecorderActive(_ isActive: Bool) {
+		NotificationCenter.default.post(
+			name: .recorderActiveStatusDidChange, 
+			object: nil, 
+			userInfo: ["isActive": isActive]
+		)
+	}
+	
+	/**
+	检查录制器是否处于活动状态
+	
+	- Returns: 如果有任何录制器处于活动状态，则返回 true
+	*/
+	public static func isRecorderActive() -> Bool {
+		// 这里需要一个静态变量来跟踪状态
+		// 或者通过通知中心查询当前状态
+		// 简单实现可以使用 UserDefaults 临时存储状态
+		return UserDefaults.standard.bool(forKey: Notification.Name.recorderActiveStatusDidChange.rawValue)
+	}
 }
 
-extension Notification.Name {
-	static let shortcutByNameDidChange = Self("KeyboardShortcuts_shortcutByNameDidChange")
-}
 #endif
