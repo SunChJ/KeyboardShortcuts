@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		190DE7732D6DB06F008212A7 /* temp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190DE7722D6DB06F008212A7 /* temp.swift */; };
 		E36FB94A2609BA43004272D9 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36FB9492609BA43004272D9 /* App.swift */; };
 		E36FB94C2609BA43004272D9 /* MainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36FB94B2609BA43004272D9 /* MainScreen.swift */; };
 		E36FB94E2609BA45004272D9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E36FB94D2609BA45004272D9 /* Assets.xcassets */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		190DE7722D6DB06F008212A7 /* temp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = temp.swift; sourceTree = "<group>"; };
 		E33F1EFA26F3B78800ACEB0F /* KeyboardShortcuts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KeyboardShortcuts; path = ..; sourceTree = "<group>"; };
 		E36FB9462609BA43004272D9 /* KeyboardShortcutsExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyboardShortcutsExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E36FB9492609BA43004272D9 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				E36FB9492609BA43004272D9 /* App.swift */,
 				E36FB9622609BB83004272D9 /* AppState.swift */,
 				E36FB94B2609BA43004272D9 /* MainScreen.swift */,
+				190DE7722D6DB06F008212A7 /* temp.swift */,
 				E36FB9652609BF3D004272D9 /* Utilities.swift */,
 				E36FB94D2609BA45004272D9 /* Assets.xcassets */,
 				E36FB9532609BA45004272D9 /* KeyboardShortcutsExample.entitlements */,
@@ -172,6 +175,7 @@
 				E36FB94C2609BA43004272D9 /* MainScreen.swift in Sources */,
 				E36FB9662609BF3D004272D9 /* Utilities.swift in Sources */,
 				E36FB94A2609BA43004272D9 /* App.swift in Sources */,
+				190DE7732D6DB06F008212A7 /* temp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

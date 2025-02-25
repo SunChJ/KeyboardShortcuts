@@ -128,6 +128,7 @@ struct MainScreen: View {
 			DoubleShortcut()
 			Divider()
 			DynamicShortcut()
+			CollectShortcut()
 		}
 		.frame(width: 400, height: 320)
 	}

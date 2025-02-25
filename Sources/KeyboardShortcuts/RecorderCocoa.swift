@@ -93,13 +93,22 @@ extension KeyboardShortcuts {
 			self.placeholderString = "record_shortcut".localized
 			self.alignment = .center
 			(cell as? NSSearchFieldCell)?.searchButtonCell = nil
+			// 完全禁用取消按钮
+			(cell as? NSSearchFieldCell)?.cancelButtonCell = nil
 
 			self.wantsLayer = true
 			setContentHuggingPriority(.defaultHigh, for: .vertical)
 			setContentHuggingPriority(.defaultHigh, for: .horizontal)
-
-			// Hide the cancel button when not showing the shortcut so the placeholder text is properly centered. Must be last.
-			self.cancelButton = (cell as? NSSearchFieldCell)?.cancelButtonCell
+			
+			// 隐藏选中时的视觉效果
+			self.focusRingType = .none
+			
+			// 自定义外观，移除选中效果
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.bezelStyle = .roundedBezel
+				cell.isBordered = false  // 设置为 false 以移除边框
+				cell.drawsBackground = true
+			}
 
 			setStringValue(name: name)
 
@@ -197,6 +206,11 @@ extension KeyboardShortcuts {
 				self?.preventBecomingKey()
 			}
 
+			// 确保视图始终不显示边框
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.isBordered = false
+			}
+			
 			preventBecomingKey()
 		}
 
@@ -206,6 +220,16 @@ extension KeyboardShortcuts {
 
 			guard shouldBecomeFirstResponder else {
 				return shouldBecomeFirstResponder
+			}
+			
+			// 隐藏选中时的视觉效果
+			self.layer?.borderWidth = 0
+			self.layer?.shadowOpacity = 0
+			
+			// 保存当前背景色和边框样式
+			if let cell = self.cell as? NSSearchFieldCell {
+				cell.isBordered = false
+				cell.drawsBackground = true
 			}
 
 			placeholderString = "press_shortcut".localized
@@ -339,6 +363,17 @@ extension KeyboardShortcuts {
 		private func saveShortcut(_ shortcut: Shortcut?) {
 			setShortcut(shortcut, for: shortcutName)
 			onChange?(shortcut)
+		}
+
+		/// :nodoc:
+		override public func drawFocusRingMask() {
+			// 不绘制任何内容，完全隐藏焦点环
+		}
+		
+		/// :nodoc:
+		override public var focusRingMaskBounds: NSRect {
+			// 返回零大小的矩形，确保不会绘制焦点环
+			return .zero
 		}
 	}
 }
