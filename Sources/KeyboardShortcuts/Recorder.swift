@@ -169,18 +169,32 @@ extension KeyboardShortcuts.Recorder {
 	}
 }
 
-#Preview {
-	KeyboardShortcuts.Recorder("record_shortcut", name: .init("xcodePreview"))
-		.environment(\.locale, .init(identifier: "en"))
+#Preview("English") {
+	VStack {
+		Text("Current locale: en")
+		Text(NSLocalizedString("record_shortcut", comment: ""))
+		KeyboardShortcuts.Recorder("record_shortcut".localized, name: .init("xcodePreview"))
+	}
+	.frame(width: 300, height: 100)
 }
 
-#Preview {
-	KeyboardShortcuts.Recorder("record_shortcut", name: .init("xcodePreview"))
-		.environment(\.locale, .init(identifier: "zh-Hans"))
+#Preview("Chinese") {
+	VStack {
+		Text("Current locale: zh-Hans")
+		Text(NSLocalizedString("record_shortcut", comment: ""))
+		KeyboardShortcuts.Recorder("record_shortcut".localized, name: .init("xcodePreview"))
+	}
+	.frame(width: 300, height: 100)
+	.environment(\.locale, .init(identifier: "zh-Hans"))
 }
 
-#Preview {
-	KeyboardShortcuts.Recorder("record_shortcut", name: .init("xcodePreview"))
-		.environment(\.locale, .init(identifier: "ru"))
+#Preview("Russian") {
+	VStack {
+		Text("Current locale: ru")
+		Text(NSLocalizedString("record_shortcut", comment: ""))
+		KeyboardShortcuts.Recorder("record_shortcut".localized, name: .init("xcodePreview"))
+	}
+	.frame(width: 300, height: 100)
+	.environment(\.locale, .init(identifier: "ru"))
 }
 #endif

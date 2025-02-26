@@ -4,12 +4,29 @@ import SwiftUI
 
 
 extension String {
-	/**
-	Makes the string localizable.
-	*/
-	var localized: String {
-		NSLocalizedString(self, bundle: .module, comment: self)
-	}
+	 /**
+    Makes the string localizable.
+    */
+    var localized: String {
+        let bundle = Bundle.module
+        
+		var targetIdentifier = Locale.current.identifier
+		// 这是一个临时解决方案，优先使用中文
+		if Locale.current.identifier == "en_CN", Locale.preferredLanguages.contains("zh-Hans") {
+			targetIdentifier = "zh-Hans"
+		}
+		
+        if let path = bundle.path(forResource: targetIdentifier, ofType: "lproj"),
+           let langBundle = Bundle(path: path) {
+            let localizedString = NSLocalizedString(self, bundle: langBundle, comment: self)
+            if localizedString != self {
+                return localizedString
+            }
+        }
+        
+        // 3. 回退到标准本地化机制
+        return NSLocalizedString(self, bundle: bundle, comment: self)
+    }
 }
 
 

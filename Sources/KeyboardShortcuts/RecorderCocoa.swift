@@ -31,7 +31,7 @@ extension KeyboardShortcuts {
 		private let onChange: ((_ shortcut: Shortcut?) -> Void)?
 		private var canBecomeKey = false
 		private var eventMonitor: LocalEventMonitor?
-		private var globalEventMonitor: Any?
+//		private var globalEventMonitor: Any?
 		private var shortcutsNameChangeObserver: NSObjectProtocol?
 		private var windowDidResignKeyObserver: NSObjectProtocol?
 		private var windowDidBecomeKeyObserver: NSObjectProtocol?
@@ -100,6 +100,20 @@ extension KeyboardShortcuts {
 				}
 			}
 			
+			// 监听窗口状态变化
+			NotificationCenter.default.addObserver(
+				self,
+				selector: #selector(windowDidResignKey),
+				name: NSWindow.didResignKeyNotification,
+				object: nil
+			)
+		}
+		
+		@objc private func windowDidResignKey(_ notification: Notification) {
+			// 当窗口失去焦点时结束录制
+			if isRecording {
+				endRecording()
+			}
 		}
 
 		private func startRecording() {
@@ -114,15 +128,16 @@ extension KeyboardShortcuts {
 					return nil
 				}
 				
+				// Tab键 - 结束录制并允许事件继续传递以便聚焦下一个控件
 				if
 					event.modifiers.isEmpty,
 					event.specialKey == .tab
 				{
 					self.endRecording()
-					// 我们故意让事件继续传递，以便它可以聚焦下一个响应者
 					return event
 				}
 
+				// Esc键 - 取消录制
 				if
 					event.modifiers.isEmpty,
 					event.keyCode == kVK_Escape
@@ -131,6 +146,7 @@ extension KeyboardShortcuts {
 					return nil
 				}
 
+				// Delete/Backspace键 - 清除当前快捷键
 				if
 					event.modifiers.isEmpty,
 					event.specialKey == .delete
@@ -152,6 +168,17 @@ extension KeyboardShortcuts {
 					return nil
 				}
 				
+				// 检查是否与当前设置的快捷键相同
+				let currentShortcut = KeyboardShortcuts.getShortcut(for: shortcutName)
+				print("oldKeyshortcut: \(String(describing: currentShortcut))")
+				print("shortcut: \(shortcut)")
+				if shortcut == currentShortcut {
+					// 如果用户选择了与当前相同的快捷键，直接接受并结束录制
+					self.endRecording()
+					return nil
+				}
+				
+				// 检查快捷键冲突
 				if let menuItem = shortcut.takenByMainMenu {
 					self.endRecording()
 
@@ -201,31 +228,36 @@ extension KeyboardShortcuts {
 				return nil
 			}.start()
 			
-			// // 监听鼠标点击事件（全局）
-			// globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-			// 	guard let self = self, self.isRecording else { return }
-				
-			// 	// 检查点击是否在视图外部
-			// 	let clickPoint = self.window?.convertPoint(fromScreen: event.locationInWindow) ?? .zero
-			// 	let viewFrameInWindow = self.convert(self.bounds, to: nil)
-				
-			// 	if !viewFrameInWindow.contains(clickPoint) {
-			// 		// 点击在视图外部，结束录制
-			// 		DispatchQueue.main.async {
-			// 			self.endRecording()
-			// 		}
-			// 	}
-			// }
+			// 添加全局事件监听器，用于检测点击视图外部
+//			globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+//				guard let self = self, self.isRecording else { return }
+//				
+//				// 检查点击是否在视图外部
+//				if let window = self.window {
+//					let clickPoint = window.convertPoint(fromScreen: event.locationInWindow)
+//					let viewFrameInWindow = self.convert(self.bounds, to: nil)
+//					
+//					if !viewFrameInWindow.contains(clickPoint) {
+//						// 点击在视图外部，结束录制
+//						DispatchQueue.main.async {
+//							self.endRecording()
+//						}
+//					}
+//				}
+//			}
+			
+			// 更新视图状态
+			needsDisplay = true
 		}
 
 		private func endRecording() {
 			isRecording = false
 			eventMonitor = nil
 			
-			if let globalMonitor = globalEventMonitor {
-				NSEvent.removeMonitor(globalMonitor)
-				globalEventMonitor = nil
-			}
+//			if let globalMonitor = globalEventMonitor {
+//				NSEvent.removeMonitor(globalMonitor)
+//				globalEventMonitor = nil
+//			}
 			
 			window?.makeFirstResponder(nil)
 			KeyboardShortcuts.isPaused = false
