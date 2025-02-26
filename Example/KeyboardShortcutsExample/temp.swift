@@ -45,7 +45,9 @@ struct CollectShortcut: View {
 
 	init() {
 		
-		
+		KeyboardShortcuts.onKeyUp(for: .collect) {
+			print("handle - collect")
+		}
 	}
 	
   var body: some View {
