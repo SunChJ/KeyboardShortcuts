@@ -187,7 +187,7 @@ An enumeration of special keys requiring specific handling when used with `Recor
 
 Using an enumeration ensures all cases are exhaustively addressed in all three contexts, providing compile-time safety and reducing the risk of unhandled keys.
 */
-private enum SpecialKey {
+private enum SpecialKey: CaseIterable {
 	case `return`
 	case delete
 	case deleteForward
@@ -761,6 +761,94 @@ extension KeyboardShortcuts.Shortcut {
 			return KeyboardShortcut(KeyEquivalent(character), modifiers: modifiers.toEventModifiers)
 		}
 
+		return nil
+	}
+}
+
+extension KeyboardShortcuts.Shortcut {
+	/// Convert a keyboard shortcut to a human-readable string representation
+	/// Example: "⌘⇧A" for Command+Shift+A
+	@MainActor
+	public var toString: String {
+		var result = ""
+		
+		let modifierSymbols: [(NSEvent.ModifierFlags, String)] = [
+			(.control, "⌃"),
+			(.option, "⌥"),
+			(.shift, "⇧"),
+			(.command, "⌘")
+		]
+		
+		// Add modifier symbols in a consistent order
+		for (flag, symbol) in modifierSymbols {
+			if modifiers.contains(flag) {
+				result += symbol
+			}
+		}
+		
+		// Add the key symbol
+		if let key = self.key {
+			if let specialKey = keyToSpecialKeyMapping[key] {
+				result += specialKey.presentableDescription
+			} else if let character = keyToCharacter() {
+				result += String(character).uppercased()
+			}
+		}
+		
+		return result
+	}
+	
+	/// Create a keyboard shortcut from a string representation
+	/// Example: "⌘⇧A" creates a Command+Shift+A shortcut
+	@MainActor
+	public static func fromString(_ string: String) -> Self? {
+		var modifiers: NSEvent.ModifierFlags = []
+		var remainingString = string
+		
+		// Map of modifier symbols to their flags
+		let modifierMapping: [String: NSEvent.ModifierFlags] = [
+			"⌃": .control,
+			"⌥": .option,
+			"⇧": .shift,
+			"⌘": .command
+		]
+		
+		// Extract modifiers
+		for (symbol, flag) in modifierMapping {
+			if remainingString.hasPrefix(symbol) {
+				modifiers.insert(flag)
+				remainingString = String(remainingString.dropFirst())
+			}
+		}
+		
+		// The remaining string should be the key
+		guard !remainingString.isEmpty else { return nil }
+		
+		// Try to find special key first
+		if let specialKey = SpecialKey.allCases.first(where: { $0.presentableDescription == remainingString }),
+		   let matchingKey = keyToSpecialKeyMapping.first(where: { $0.value == specialKey })?.key {
+			return Self(matchingKey, modifiers: modifiers)
+		}
+		
+		// If not a special key, try to find the key code for the character
+		 let keyChar = remainingString.uppercased()
+		 
+		 // Define all standard keys to check
+		 let standardKeys: [KeyboardShortcuts.Key] = [
+				 .a, .b, .c, .d, .e, .f, .g, .h, .i, .j, .k, .l, .m,
+				 .n, .o, .p, .q, .r, .s, .t, .u, .v, .w, .x, .y, .z,
+				 .zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine,
+				 .backslash, .backtick, .comma, .equal, .minus, .period, .quote,
+				 .semicolon, .slash, .leftBracket, .rightBracket
+		 ]
+		 
+		 if let key = standardKeys.first(where: { key in
+				 guard let char = Self(key).keyToCharacter() else { return false }
+				 return String(char).uppercased() == keyChar
+		 }) {
+				 return Self(key, modifiers: modifiers)
+		 }
+		
 		return nil
 	}
 }
